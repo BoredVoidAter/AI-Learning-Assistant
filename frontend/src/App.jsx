@@ -31,6 +31,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/learning-paths"
+            element={
+              <PrivateRoute>
+                <LearningPaths />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>
