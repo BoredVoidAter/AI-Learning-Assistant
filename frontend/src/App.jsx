@@ -47,6 +47,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/resources"
+            element={
+              <PrivateRoute>
+                <Resources />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>
