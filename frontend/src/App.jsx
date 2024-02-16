@@ -55,6 +55,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/notes"
+            element={
+              <PrivateRoute>
+                <Notes />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>
