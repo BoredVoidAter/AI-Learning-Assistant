@@ -40,6 +40,14 @@ function App() {
             }
           />
           <Route
+            path="/learning-paths/:id"
+            element={
+              <PrivateRoute>
+                <LearningPathDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/quizzes"
             element={
               <PrivateRoute>
