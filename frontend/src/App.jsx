@@ -56,6 +56,14 @@ function App() {
             }
           />
           <Route
+            path="/quizzes/:id"
+            element={
+              <PrivateRoute>
+                <QuizDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/resources"
             element={
               <PrivateRoute>
