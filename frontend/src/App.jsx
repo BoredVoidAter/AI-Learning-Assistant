@@ -72,6 +72,14 @@ function App() {
             }
           />
           <Route
+            path="/resources/:id"
+            element={
+              <PrivateRoute>
+                <ResourceDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/notes"
             element={
               <PrivateRoute>
