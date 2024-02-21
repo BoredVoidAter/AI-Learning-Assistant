@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
-import { LayoutDashboard, BookOpen, Brain, FileText, Lightbulb, Settings, LogOut, PlusCircle, Search, Filter } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Brain, FileText, Lightbulb, Settings, LogOut, PlusCircle, Search, Filter, Wand2 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -20,6 +20,12 @@ const Resources = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAIGenModalOpen, setIsAIGenModalOpen] = useState(false);
+  const [aiGenPrompt, setAiGenPrompt] = useState('');
+  const [aiGenContentType, setAiGenContentType] = useState('article');
+  const [aiGenLoading, setAiGenLoading] = useState(false);
+  const [aiGenError, setAiGenError] = useState(null);
+  const [aiGeneratedContent, setAiGeneratedContent] = useState('');
   const [newResourceData, setNewResourceData] = useState({
     topic_id: '',
     title: '',
@@ -113,9 +119,37 @@ const Resources = () => {
     }
   };
 
+  const handleGenerateAIContent = async () => {
+    setAiGenLoading(true);
+    setAiGenError(null);
+    setAiGeneratedContent("");
+    try {
+      const response = await axios.post(`${API_URL}/ai/generate-content`, {
+        prompt: aiGenPrompt,
+        content_type: aiGenContentType,
+      });
+      setAiGeneratedContent(response.data.generated_content);
+    } catch (err) {
+      setAiGenError(err.response?.data?.error || "Failed to generate AI content");
+    }
+    setAiGenLoading(false);
+  };
+
+  const handleUseGeneratedContent = () => {
+    setNewResourceData((prevData) => ({
+      ...prevData,
+      content: aiGeneratedContent,
+      title: aiGenPrompt.substring(0, 50), // Use prompt as a base for title
+      description: aiGeneratedContent.substring(0, 100) + "...", // Use generated content as description
+      resource_type: aiGenContentType === "article" ? "article" : "other",
+    }));
+    setIsAIGenModalOpen(false);
+    setIsModalOpen(true); // Open the add resource modal with pre-filled data
+  };
+
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (loading) {
@@ -134,34 +168,34 @@ const Resources = () => {
         <nav className="flex-grow">
           <ul>
             <li className="mb-2">
-              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate('/dashboard')}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/dashboard")}>
                 <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
               </Button>
             </li>
             <li className="mb-2">
-              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate('/learning-paths')}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/learning-paths")}>
                 <BookOpen className="mr-2 h-4 w-4" /> Learning Paths
               </Button>
             </li>
             <li className="mb-2">
-              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate('/quizzes')}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/quizzes")}>
                 <Brain className="mr-2 h-4 w-4" /> Quizzes
               </Button>
             </li>
             <li className="mb-2">
-              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate('/resources')}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/resources")}>
                 <Lightbulb className="mr-2 h-4 w-4" /> Resources
               </Button>
             </li>
             <li className="mb-2">
-              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate('/notes')}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/notes")}>
                 <FileText className="mr-2 h-4 w-4" /> Notes
               </Button>
             </li>
           </ul>
         </nav>
         <div className="mt-auto">
-          <Button variant="ghost" className="w-full justify-start mb-2" onClick={() => navigate('/settings')}>
+          <Button variant="ghost" className="w-full justify-start mb-2" onClick={() => navigate("/settings")}>
             <Settings className="mr-2 h-4 w-4" /> Settings
           </Button>
           <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600" onClick={handleLogout}>
@@ -223,9 +257,14 @@ const Resources = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add New Resource
-          </Button>
+          <div className="flex space-x-2">
+            <Button onClick={() => setIsAIGenModalOpen(true)} variant="outline">
+              <Wand2 className="mr-2 h-4 w-4" /> Generate with AI
+            </Button>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add New Resource
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -266,7 +305,7 @@ const Resources = () => {
           <form onSubmit={handleCreateResource} className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="topic_id" className="text-right">Topic</Label>
-              <Select value={newResourceData.topic_id} onValueChange={(value) => handleNewResourceSelectChange('topic_id', value)} required>
+              <Select value={newResourceData.topic_id} onValueChange={(value) => handleNewResourceSelectChange("topic_id", value)} required>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a topic" />
                 </SelectTrigger>
@@ -287,7 +326,7 @@ const Resources = () => {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="resource_type" className="text-right">Type</Label>
-              <Select value={newResourceData.resource_type} onValueChange={(value) => handleNewResourceSelectChange('resource_type', value)} required>
+              <Select value={newResourceData.resource_type} onValueChange={(value) => handleNewResourceSelectChange("resource_type", value)} required>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select resource type" />
                 </SelectTrigger>
@@ -315,7 +354,7 @@ const Resources = () => {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="difficulty_level" className="text-right">Difficulty</Label>
-              <Select value={newResourceData.difficulty_level} onValueChange={(value) => handleNewResourceSelectChange('difficulty_level', value)}>
+              <Select value={newResourceData.difficulty_level} onValueChange={(value) => handleNewResourceSelectChange("difficulty_level", value)}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select difficulty" />
                 </SelectTrigger>
@@ -332,9 +371,58 @@ const Resources = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* AI Generation Modal */}
+      <Dialog open={isAIGenModalOpen} onOpenChange={setIsAIGenModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Generate Content with AI</DialogTitle>
+            <DialogDescription>Enter a prompt to generate new learning content.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="ai-prompt" className="text-right">Prompt</Label>
+              <Textarea
+                id="ai-prompt"
+                value={aiGenPrompt}
+                onChange={(e) => setAiGenPrompt(e.target.value)}
+                className="col-span-3"
+                placeholder="e.g., 'Explain quantum physics for beginners' or 'Write an article on the history of AI'"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="ai-content-type" className="text-right">Content Type</Label>
+              <Select value={aiGenContentType} onValueChange={setAiGenContentType}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select content type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="article">Article</SelectItem>
+                  <SelectItem value="summary">Summary</SelectItem>
+                  <SelectItem value="explanation">Explanation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleGenerateAIContent} disabled={aiGenLoading || !aiGenPrompt}>
+              {aiGenLoading ? "Generating..." : "Generate"}
+            </Button>
+            {aiGenError && <p className="text-red-500 text-center">Error: {aiGenError}</p>}
+            {aiGeneratedContent && (
+              <div className="mt-4 p-4 border rounded-md bg-gray-50 dark:bg-gray-700 max-h-60 overflow-y-auto">
+                <h3 className="font-semibold mb-2">Generated Content:</h3>
+                <p className="whitespace-pre-wrap text-sm">{aiGeneratedContent}</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleUseGeneratedContent} disabled={!aiGeneratedContent}>
+              Use Generated Content
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default Resources;
-
