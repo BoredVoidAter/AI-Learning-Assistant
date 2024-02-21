@@ -21,9 +21,11 @@ class User(db.Model):
     
     # Learning preferences
     learning_style = db.Column(db.String(50), nullable=True)  # visual, auditory, kinesthetic, reading
-    preferred_difficulty = db.Column(db.String(20), default='intermediate')  # beginner, intermediate, advanced
+    preferred_difficulty = db.Column(db.String(20), default=\'intermediate\')  # beginner, intermediate, advanced
     daily_goal_minutes = db.Column(db.Integer, default=30)
-    
+    last_login = db.Column(db.DateTime, nullable=True)
+    study_reminders_enabled = db.Column(db.Boolean, default=True)
+    notification_email = db.Column(db.Boolean, default=True)   
     # Relationships
     learning_paths = db.relationship('LearningPath', backref='user', lazy=True, cascade='all, delete-orphan')
     quiz_attempts = db.relationship('QuizAttempt', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -70,7 +72,10 @@ class User(db.Model):
             'daily_goal_minutes': self.daily_goal_minutes,
             'is_active': self.is_active,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'last_login': self.last_login.isoformat() if self.last_login else None,
+            'study_reminders_enabled': self.study_reminders_enabled,
+            'notification_email': self.notification_email
         }
 
 class LearningPath(db.Model):
