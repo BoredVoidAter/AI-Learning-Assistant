@@ -12,6 +12,7 @@ from src.routes.quizzes import quiz_bp
 from src.routes.resources import resource_bp
 from src.routes.notes import note_bp
 from src.routes.analytics import analytics_bp
+from src.routes.ai import ai_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
@@ -25,6 +26,7 @@ app.register_blueprint(quiz_bp, url_prefix='/api')
 app.register_blueprint(resource_bp, url_prefix='/api')
 app.register_blueprint(note_bp, url_prefix='/api')
 app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+app.register_blueprint(ai_bp, url_prefix='/api/ai')
 
 # uncomment if you need to use database
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
