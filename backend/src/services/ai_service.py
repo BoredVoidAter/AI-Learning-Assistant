@@ -228,6 +228,34 @@ class AIService:
             current_app.logger.error(f"AI recommendations failed: {str(e)}")
             return self._fallback_recommendations(learning_style)
     
+    def generate_article(self, topic: str, length: int = 500) -> str:
+        """Generate an article on a given topic using AI"""
+        try:
+            if not self.openai_api_key:
+                return f"This is a placeholder article about {topic}. AI article generation is not available."
+            
+            prompt = f"""
+            Write a comprehensive article about: {topic}
+            The article should be approximately {length} words long.
+            Focus on providing informative and engaging content.
+            """
+            
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an expert content writer. Write clear, concise, and informative articles."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=length + 100, # Allow some buffer
+                temperature=0.7
+            )
+            
+            return response.choices[0].message.content.strip()
+            
+        except Exception as e:
+            current_app.logger.error(f"AI article generation failed: {str(e)}")
+            return f"Failed to generate article about {topic}. Error: {str(e)}"
+
     def _fallback_learning_path(self, subject: str, difficulty: str) -> Dict:
         """Fallback learning path when AI is not available"""
         topics_map = {
