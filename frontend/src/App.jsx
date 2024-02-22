@@ -103,6 +103,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/recommendations"
+            element={
+              <PrivateRoute>
+                <Recommendations />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>
