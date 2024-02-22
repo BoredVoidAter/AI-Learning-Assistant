@@ -228,166 +228,51 @@ class AIService:
             current_app.logger.error(f"AI recommendations failed: {str(e)}")
             return self._fallback_recommendations(learning_style)
     
-    def generate_article(self, topic: str, length: int = 500) -> str:
-        """Generate an article on a given topic using AI"""
+    def generate_study_recommendations(self, user_progress: Dict, learning_style: str) -> List[Dict]:
+        """Generate personalized study recommendations"""
         try:
             if not self.openai_api_key:
-                return f"This is a placeholder article about {topic}. AI article generation is not available."
+                return self._fallback_recommendations(learning_style)
             
             prompt = f"""
-            Write a comprehensive article about: {topic}
-            The article should be approximately {length} words long.
-            Focus on providing informative and engaging content.
+            Based on the following user learning data, provide 5 personalized study recommendations:
+            
+            Learning style: {learning_style}
+            Progress data: {json.dumps(user_progress)}
+            
+            Consider:
+            - Areas where the user is struggling
+            - Learning style preferences
+            - Time management
+            - Motivation techniques
+            
+            Format as JSON array:
+            [
+                {{
+                    "title": "Recommendation title",
+                    "description": "Detailed recommendation",
+                    "priority": "high|medium|low",
+                    "estimated_time": "Time needed",
+                    "category": "study_technique|time_management|content_review|motivation"
+                }}
+            ]
             """
             
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are an expert content writer. Write clear, concise, and informative articles."},
+                    {"role": "system", "content": "You are an expert learning coach providing personalized study advice."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=length + 100, # Allow some buffer
+                max_tokens=800,
                 temperature=0.7
             )
             
-            return response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            return json.loads(content)
             
         except Exception as e:
-            current_app.logger.error(f"AI article generation failed: {str(e)}")
-            return f"Failed to generate article about {topic}. Error: {str(e)}"
+            current_app.logger.error(f"AI recommendations failed: {str(e)}")
+            return self._fallback_recommendations(learning_style)
 
-    def _fallback_learning_path(self, subject: str, difficulty: str) -> Dict:
-        """Fallback learning path when AI is not available"""
-        topics_map = {
-            "programming": [
-                {"title": "Programming Fundamentals", "hours": 8},
-                {"title": "Data Structures", "hours": 10},
-                {"title": "Algorithms", "hours": 12},
-                {"title": "Object-Oriented Programming", "hours": 8},
-                {"title": "Debugging and Testing", "hours": 6}
-            ],
-            "mathematics": [
-                {"title": "Basic Algebra", "hours": 6},
-                {"title": "Geometry", "hours": 8},
-                {"title": "Calculus Basics", "hours": 10},
-                {"title": "Statistics", "hours": 8},
-                {"title": "Applied Mathematics", "hours": 8}
-            ]
-        }
-        
-        default_topics = [
-            {"title": f"{subject} Basics", "hours": 6},
-            {"title": f"Intermediate {subject}", "hours": 8},
-            {"title": f"Advanced {subject}", "hours": 10},
-            {"title": f"{subject} Applications", "hours": 8},
-            {"title": f"{subject} Projects", "hours": 8}
-        ]
-        
-        topics = topics_map.get(subject.lower(), default_topics)
-        
-        return {
-            "title": f"{subject} Learning Path",
-            "description": f"A comprehensive {difficulty} level learning path for {subject}",
-            "estimated_total_hours": sum(t["hours"] for t in topics),
-            "topics": [
-                {
-                    "title": topic["title"],
-                    "description": f"Learn the fundamentals of {topic['title'].lower()}",
-                    "estimated_hours": topic["hours"],
-                    "resources": [
-                        {
-                            "title": f"Introduction to {topic['title']}",
-                            "type": "video",
-                            "description": f"Video tutorial covering {topic['title'].lower()}",
-                            "estimated_minutes": 45
-                        },
-                        {
-                            "title": f"{topic['title']} Practice",
-                            "type": "exercise",
-                            "description": f"Hands-on exercises for {topic['title'].lower()}",
-                            "estimated_minutes": 60
-                        }
-                    ]
-                }
-                for topic in topics
-            ]
-        }
-    
-    def _fallback_quiz_questions(self, topic: str, difficulty: str, count: int) -> List[Dict]:
-        """Fallback quiz questions when AI is not available"""
-        questions = []
-        for i in range(count):
-            if i % 3 == 0:  # Multiple choice
-                questions.append({
-                    "question_text": f"What is a key concept in {topic}?",
-                    "question_type": "multiple_choice",
-                    "correct_answer": "Option A",
-                    "options": ["Option A", "Option B", "Option C", "Option D"],
-                    "explanation": f"This is the correct answer about {topic}"
-                })
-            elif i % 3 == 1:  # True/False
-                questions.append({
-                    "question_text": f"{topic} is an important subject to study.",
-                    "question_type": "true_false",
-                    "correct_answer": "True",
-                    "options": ["True", "False"],
-                    "explanation": f"Yes, {topic} is indeed important"
-                })
-            else:  # Short answer
-                questions.append({
-                    "question_text": f"Define {topic} in your own words.",
-                    "question_type": "short_answer",
-                    "correct_answer": f"A definition of {topic}",
-                    "options": None,
-                    "explanation": f"This is a basic definition of {topic}"
-                })
-        
-        return questions
-    
-    def _fallback_recommendations(self, learning_style: str) -> List[Dict]:
-        """Fallback recommendations when AI is not available"""
-        style_recommendations = {
-            "visual": [
-                {
-                    "title": "Use Mind Maps",
-                    "description": "Create visual mind maps to connect concepts and improve understanding",
-                    "priority": "high",
-                    "estimated_time": "15-20 minutes per topic",
-                    "category": "study_technique"
-                },
-                {
-                    "title": "Watch Educational Videos",
-                    "description": "Supplement reading with visual content like educational videos and animations",
-                    "priority": "medium",
-                    "estimated_time": "30-45 minutes daily",
-                    "category": "content_review"
-                }
-            ],
-            "auditory": [
-                {
-                    "title": "Listen to Podcasts",
-                    "description": "Find educational podcasts related to your subjects for passive learning",
-                    "priority": "high",
-                    "estimated_time": "20-30 minutes daily",
-                    "category": "study_technique"
-                },
-                {
-                    "title": "Study with Background Music",
-                    "description": "Use instrumental music to enhance focus during study sessions",
-                    "priority": "medium",
-                    "estimated_time": "During study sessions",
-                    "category": "study_technique"
-                }
-            ]
-        }
-        
-        return style_recommendations.get(learning_style, [
-            {
-                "title": "Regular Practice",
-                "description": "Consistent daily practice is key to mastering any subject",
-                "priority": "high",
-                "estimated_time": "30-60 minutes daily",
-                "category": "study_technique"
-            }
-        ])
-
+    def generate_article(self, topic: str, length: int = 500) -> str:
