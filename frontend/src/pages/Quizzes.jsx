@@ -42,7 +42,7 @@ const Quizzes = () => {
     setError(null);
     try {
       const params = {
-        search: searchQuery,
+        search_query: searchQuery,
         difficulty: filterDifficulty,
         topic_id: filterTopic,
       };
