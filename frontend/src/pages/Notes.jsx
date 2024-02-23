@@ -44,7 +44,7 @@ const Notes = () => {
     setError(null);
     try {
       const params = {
-        search: searchQuery,
+        search_query: searchQuery,
         resource_id: filterResource,
         is_favorite: filterFavorite === 'true' ? true : filterFavorite === 'false' ? false : undefined,
         tag: filterTag,
