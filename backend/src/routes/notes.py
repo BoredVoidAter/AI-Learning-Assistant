@@ -17,6 +17,7 @@ def get_notes(current_user):
         resource_id = request.args.get("resource_id", type=int)
         is_favorite = request.args.get("is_favorite", type=bool)
         tag = request.args.get("tag", "")
+        search_query = request.args.get("search_query", "")
         
         # Build query
         query = Note.query.filter(Note.user_id == current_user.id)
@@ -35,7 +36,11 @@ def get_notes(current_user):
             query = query.filter(Note.is_favorite == is_favorite)
         if tag:
             query = query.filter(Note.tags.contains([tag]))
-        
+        if search_query:
+            query = query.filter(or_(
+                Note.title.ilike(f"%{search_query}%"),
+                Note.content.ilike(f"%{search_query}%")
+            ))
         # Order by creation date (newest first)
         query = query.order_by(Note.created_at.desc())
         
