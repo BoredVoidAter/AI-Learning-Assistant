@@ -12,11 +12,11 @@ def get_quizzes(current_user):
     """Get quizzes for user's learning paths"""
     try:
         # Get query parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
-        topic_id = request.args.get('topic_id', type=int)
-        difficulty = request.args.get('difficulty', '')
-        
+        page = request.args.get(\'page\', 1, type=int)
+        per_page = request.args.get(\'per_page\', 10, type=int)
+        topic_id = request.args.get(\'topic_id\', type=int)
+        difficulty = request.args.get(\'difficulty\', \'\')
+
         # Build query - only quizzes from user's learning paths
         query = db.session.query(Quiz).join(Topic).join(LearningPath).filter(
             LearningPath.user_id == current_user.id,
@@ -28,7 +28,11 @@ def get_quizzes(current_user):
             query = query.filter(Quiz.topic_id == topic_id)
         if difficulty:
             query = query.filter(Quiz.difficulty_level == difficulty)
-        
+        if search_query:
+            query = query.filter(or_(
+                Quiz.title.ilike(f'%{search_query}%'),
+                Quiz.description.ilike(f'%{search_query}%')
+            ))
         # Order by creation date
         query = query.order_by(Quiz.created_at.desc())
         
