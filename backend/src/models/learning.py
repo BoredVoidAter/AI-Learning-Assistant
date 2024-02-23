@@ -308,3 +308,26 @@ class Notification(db.Model):
         }
 
 
+
+
+class UserActivity(db.Model):
+    __tablename__ = 'user_activities'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    activity_type = db.Column(db.String(100), nullable=False)  # e.g., 'quiz_completed', 'resource_viewed', 'note_created'
+    activity_details = db.Column(db.JSON, nullable=True)  # JSON field for additional details
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='activities', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'activity_type': self.activity_type,
+            'activity_details': self.activity_details,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+

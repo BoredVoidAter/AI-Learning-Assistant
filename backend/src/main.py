@@ -16,6 +16,7 @@ from src.routes.ai import ai_bp
 from src.routes.user import user_bp
 from src.routes.recommendations import recommendations_bp
 from src.routes.notifications import notifications_bp
+from src.routes.activity import activity_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
@@ -32,7 +33,8 @@ app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
 app.register_blueprint(ai_bp, url_prefix=\"/api/ai\")
 app.register_blueprint(user_bp, url_prefix=\"/api/user\")
 app.register_blueprint(recommendations_bp, url_prefix=\"/api/recommendations\")
-app.register_blueprint(notifications_bp, url_prefix=\"/api\")# uncomment if you need to use database
+app.register_blueprint(notifications_bp, url_prefix=\"/api\")
+app.register_blueprint(activity_bp, url_prefix=\"/api\")# uncomment if you need to use database
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
