@@ -17,6 +17,7 @@ def get_resources(current_user):
         topic_id = request.args.get("topic_id", type=int)
         resource_type = request.args.get("resource_type", "")
         difficulty = request.args.get("difficulty_level", "")
+        search_query = request.args.get("search_query", "")
         
         # Build query - only resources from user's learning paths
         query = db.session.query(Resource).join(Topic).join(LearningPath).filter(
@@ -37,7 +38,12 @@ def get_resources(current_user):
             query = query.filter(Resource.resource_type == resource_type)
         if difficulty:
             query = query.filter(Resource.difficulty_level == difficulty)
-        
+        if search_query:
+            query = query.filter(or_(
+                Resource.title.ilike(f"%{search_query}%"),
+                Resource.description.ilike(f"%{search_query}%"),
+                Resource.content.ilike(f"%{search_query}%")
+            ))
         # Order by creation date (newest first)
         query = query.order_by(Resource.created_at.desc())
         
