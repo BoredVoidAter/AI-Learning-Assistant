@@ -41,7 +41,7 @@ const LearningPaths = () => {
     setError(null);
     try {
       const params = {
-        search: searchQuery,
+        search_query: searchQuery,
         difficulty: filterDifficulty,
         subject: filterSubject,
       };
