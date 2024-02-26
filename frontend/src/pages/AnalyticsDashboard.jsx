@@ -15,6 +15,7 @@ const AnalyticsDashboard = () => {
   const [learningProgress, setLearningProgress] = useState(null);
   const [quizAnalytics, setQuizAnalytics] = useState(null);
   const [studyTimeAnalytics, setStudyTimeAnalytics] = useState(null);
+  const [userActivities, setUserActivities] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -28,16 +29,18 @@ const AnalyticsDashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [dashboardRes, learningRes, quizRes, studyTimeRes] = await Promise.all([
+      const [dashboardRes, learningRes, quizRes, studyTimeRes, activitiesRes] = await Promise.all([
         axios.get(`${API_URL}/analytics/dashboard`),
         axios.get(`${API_URL}/analytics/learning-progress`),
         axios.get(`${API_URL}/analytics/quiz-analytics`),
         axios.get(`${API_URL}/analytics/study-time`),
+        axios.get(`${API_URL}/activities?per_page=5`) // Fetch last 5 activities
       ]);
       setDashboardData(dashboardRes.data);
       setLearningProgress(learningRes.data);
       setQuizAnalytics(quizRes.data);
       setStudyTimeAnalytics(studyTimeRes.data);
+      setUserActivities(activitiesRes.data.activities);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch analytics data');
     }
@@ -247,10 +250,36 @@ const AnalyticsDashboard = () => {
             </div>
           </div>
         )}
+
+        {userActivities && userActivities.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Recent Activities</h2>
+            <div className="grid grid-cols-1 gap-4">
+              {userActivities.map((activity) => (
+                <Card key={activity.id} className="shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">{activity.activity_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</CardTitle>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(activity.timestamp).toLocaleString()}</p>
+                  </CardHeader>
+                  <CardContent>
+                    {activity.activity_details && (
+                      <p className="text-gray-700 dark:text-gray-300">Details: {JSON.stringify(activity.activity_details)}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <div className="text-right mt-4">
+              <Button variant="link" onClick={() => navigate("/activities")}>View All Activities</Button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
 };
 
 export default AnalyticsDashboard;
+
+
 
