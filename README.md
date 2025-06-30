@@ -114,27 +114,7 @@ cd frontend
 npm start
 ```
 
-## Development Timeline
-
-This project is developed with a comprehensive commit history spanning from early 2024 to 2025, demonstrating:
-- Incremental feature development
-- Code refactoring and optimization
-- Bug fixes and improvements
-- Documentation updates
-- Testing implementation
-- Deployment configuration
-
-## Contributing
-
-This project follows best practices for:
-- Code organization and architecture
-- API design and documentation
-- User interface design
-- Security implementation
-- Performance optimization
-- Testing strategies
-
 ## License
 
-This project is developed for educational and portfolio purposes.
+This project is developed for educational purposes.
 
