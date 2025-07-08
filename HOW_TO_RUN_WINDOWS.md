@@ -51,7 +51,7 @@ pip install -r requirements.txt
 
 #### Set Environment Variables
 
-You need to set a `SECRET_KEY` for Flask and an `OPENAI_API_KEY` for the AI features. You can create a `.env` file in the `backend` directory or set them directly in your environment.
+You need to set a `SECRET_KEY` for Flask and a `GEMINI_API_KEY` for the AI features. You can create a `.env` file in the `backend` directory or set them directly in your environment.
 
 **Option A: Using a `.env` file (recommended for development)**
 
@@ -59,14 +59,14 @@ Create a file named `.env` in the `backend` directory with the following content
 
 ```
 SECRET_KEY="your_very_secret_key_here"
-OPENAI_API_KEY="your_openai_api_key_here"
+GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
 **Option B: Setting directly in PowerShell (temporary for current session)**
 
 ```powershell
 $env:SECRET_KEY="your_very_secret_key_here"
-$env:OPENAI_API_KEY="your_openai_api_key_here"
+$env:GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
 #### Initialize Database
@@ -75,7 +75,14 @@ The project uses SQLite. The database will be created automatically when the app
 
 #### Run the Flask Backend
 
+Before running the backend, you need to tell Flask where your application is located by setting the `FLASK_APP` environment variable. Then, you can run the development server.
+
 ```bash
+# Set the FLASK_APP environment variable
+$env:FLASK_APP="src/main.py" # For PowerShell
+# set FLASK_APP=src/main.py # For Command Prompt
+
+# Run the backend server
 flask run --host=0.0.0.0 --port=5000
 ```
 
