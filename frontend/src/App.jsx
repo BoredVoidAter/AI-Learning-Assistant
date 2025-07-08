@@ -16,6 +16,7 @@ import Settings from './pages/Settings';
 import Recommendations from './pages/Recommendations';
 import Notifications from './pages/Notifications';
 import Feedback from './pages/Feedback';
+import Gamification from './pages/Gamification';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -136,6 +137,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Feedback />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/gamification"
+            element={
+              <PrivateRoute>
+                <Gamification />
               </PrivateRoute>
             }
           />
