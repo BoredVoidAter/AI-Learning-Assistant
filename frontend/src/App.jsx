@@ -4,6 +4,18 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/AnalyticsDashboard'; // Use AnalyticsDashboard
+import LearningPaths from './pages/LearningPaths';
+import LearningPathDetail from './pages/LearningPathDetail';
+import Quizzes from './pages/Quizzes';
+import QuizDetail from './pages/QuizDetail';
+import Resources from './pages/Resources';
+import ResourceDetail from './pages/ResourceDetail';
+import Notes from './pages/Notes';
+import NoteDetail from './pages/NoteDetail';
+import Settings from './pages/Settings';
+import Recommendations from './pages/Recommendations';
+import Notifications from './pages/Notifications';
+import Feedback from './pages/Feedback';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -116,6 +128,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Notifications />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/feedback"
+            element={
+              <PrivateRoute>
+                <Feedback />
               </PrivateRoute>
             }
           />
