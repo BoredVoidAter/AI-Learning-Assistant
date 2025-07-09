@@ -1,43 +1,13 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import check_password_hash
-from src.models.learning import db, User
-from functools import wraps
-import jwt
+from src.models.user import User
+from src.database import db
+from src.utils.auth_utils import token_required
 import re
 
 auth_bp = Blueprint('auth', __name__)
 
-def token_required(f):
-    """Decorator to require authentication token"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        
-        # Check for token in Authorization header
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            try:
-                token = auth_header.split(" ")[1]  # Bearer <token>
-            except IndexError:
-                return jsonify({'error': 'Invalid token format'}), 401
-        
-        if not token:
-            return jsonify({'error': 'Token is missing'}), 401
-        
-        try:
-            # Decode the token
-            data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
-            current_user = User.query.get(data['user_id'])
-            if not current_user or not current_user.is_active:
-                return jsonify({'error': 'Invalid token'}), 401
-        except jwt.ExpiredSignatureError:
-            return jsonify({'error': 'Token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'error': 'Invalid token'}), 401
-        
-        return f(current_user, *args, **kwargs)
-    
-    return decorated
+
 
 def validate_email(email):
     """Validate email format"""

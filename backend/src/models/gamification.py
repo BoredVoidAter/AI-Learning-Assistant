@@ -1,5 +1,5 @@
 from datetime import datetime
-from src.models.learning import db
+from src.database import db
 
 class Achievement(db.Model):
     __tablename__ = 'achievements'

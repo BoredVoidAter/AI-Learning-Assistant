@@ -1,18 +1,18 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from src.models.learning import db, User, LearningPath, Quiz, Resource, Note, Topic
-from src.models.feedback import Feedback
+from src.models.learning import LearningPath, Quiz, Resource, Note, Topic
+from src.database import db
+from src.utils.auth_utils import token_required
 from sqlalchemy import or_, and_, func
 from datetime import datetime, timedelta
 
 search_bp = Blueprint('search', __name__)
 
 @search_bp.route('/search/global', methods=['GET'])
-@jwt_required()
-def global_search():
+@token_required
+def global_search(current_user):
     """Perform global search across all content types"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         query = request.args.get('q', '').strip()
         content_types = request.args.getlist('types')  # learning_paths, quizzes, resources, notes
         limit = request.args.get('limit', 20, type=int)
@@ -128,11 +128,11 @@ def global_search():
         return jsonify({'error': 'Search failed'}), 500
 
 @search_bp.route('/search/suggestions', methods=['GET'])
-@jwt_required()
-def search_suggestions():
-    """Get search suggestions based on partial query"""
+@token_required
+def search_suggestions(current_user):
+    """Get search suggestions based on partial query""" 
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         query = request.args.get('q', '').strip()
         limit = request.args.get('limit', 10, type=int)
         
@@ -185,11 +185,11 @@ def search_suggestions():
         return jsonify({'error': 'Failed to get suggestions'}), 500
 
 @search_bp.route('/search/advanced', methods=['POST'])
-@jwt_required()
-def advanced_search():
+@token_required
+def advanced_search(current_user):
     """Perform advanced search with filters"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         data = request.get_json()
         
         query = data.get('query', '').strip()
@@ -368,8 +368,8 @@ def advanced_search():
         return jsonify({'error': 'Advanced search failed'}), 500
 
 @search_bp.route('/search/popular', methods=['GET'])
-@jwt_required()
-def popular_searches():
+@token_required
+def popular_searches(current_user):
     """Get popular search terms and trending content"""
     try:
         # This is a simplified implementation

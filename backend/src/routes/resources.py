@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
-from src.models.learning import db, Resource, Topic, LearningPath
-from src.routes.auth import token_required
+from src.models.learning import Resource, Topic, LearningPath
+from src.database import db
+from src.utils.auth_utils import token_required
 from sqlalchemy import or_
 
 resource_bp = Blueprint("resource", __name__)

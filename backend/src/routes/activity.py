@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from src.models.learning import db, UserActivity
+from src.models.activity import UserActivity
+from src.database import db
 from src.utils.auth_utils import token_required
 from datetime import datetime
 

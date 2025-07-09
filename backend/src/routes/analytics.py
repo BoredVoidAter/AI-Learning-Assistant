@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
-from src.models.learning import db, User, LearningPath, Topic, QuizAttempt, Resource
-from src.routes.auth import token_required
+from src.models.learning import LearningPath, Topic, QuizAttempt, Resource
+from src.models.user import User
+from src.database import db
+from src.utils.auth_utils import token_required
 from sqlalchemy import func, and_, or_
 from datetime import datetime, timedelta
 import calendar

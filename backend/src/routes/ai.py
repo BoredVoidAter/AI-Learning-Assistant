@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
 from src.services.ai_service import AIService
+from src.utils.auth_utils import token_required
 
 ai_bp = Blueprint("ai", __name__)
 ai_service = AIService()
 
 @ai_bp.route("/generate-content", methods=["POST"])
-def generate_content():
+@token_required
+def generate_content(current_user):
     data = request.get_json()
     prompt = data.get("prompt")
     content_type = data.get("content_type", "article") # e.g., article, summary, explanation

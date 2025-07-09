@@ -1,18 +1,19 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from src.models.learning import db, User
+from src.models.user import User
+from src.database import db
 from src.models.gamification import Achievement, UserAchievement, UserLevel, Badge, UserBadge, Leaderboard
 from src.services.gamification_service import GamificationService
+from src.utils.auth_utils import token_required
 from datetime import datetime, date, timedelta
 
 gamification_bp = Blueprint('gamification', __name__)
 
 @gamification_bp.route('/gamification/profile', methods=['GET'])
-@jwt_required()
-def get_user_gamification_profile():
+@token_required
+def get_user_gamification_profile(current_user):
     """Get user's complete gamification profile"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         stats = GamificationService.get_user_stats(current_user_id)
         
         return jsonify({
@@ -24,11 +25,11 @@ def get_user_gamification_profile():
         return jsonify({'error': 'Failed to get gamification profile'}), 500
 
 @gamification_bp.route('/gamification/achievements', methods=['GET'])
-@jwt_required()
-def get_achievements():
+@token_required
+def get_achievements(current_user):
     """Get all achievements with user progress"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         
         # Get all active achievements
         achievements = Achievement.query.filter_by(is_active=True).all()
@@ -70,11 +71,11 @@ def get_achievements():
         return jsonify({'error': 'Failed to get achievements'}), 500
 
 @gamification_bp.route('/gamification/badges', methods=['GET'])
-@jwt_required()
-def get_badges():
+@token_required
+def get_badges(current_user):
     """Get all badges with user status"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         
         # Get all active badges
         badges = Badge.query.filter_by(is_active=True).all()
@@ -107,8 +108,8 @@ def get_badges():
         return jsonify({'error': 'Failed to get badges'}), 500
 
 @gamification_bp.route('/gamification/leaderboard/<leaderboard_type>/<category>', methods=['GET'])
-@jwt_required()
-def get_leaderboard(leaderboard_type, category):
+@token_required
+def get_leaderboard(current_user, leaderboard_type, category):
     """Get leaderboard for specific type and category"""
     try:
         # Validate parameters
@@ -121,7 +122,7 @@ def get_leaderboard(leaderboard_type, category):
         if category not in valid_categories:
             return jsonify({'error': 'Invalid category'}), 400
         
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         limit = request.args.get('limit', 50, type=int)
         
         # Get current period dates
@@ -162,11 +163,11 @@ def get_leaderboard(leaderboard_type, category):
         return jsonify({'error': 'Failed to get leaderboard'}), 500
 
 @gamification_bp.route('/gamification/level-progress', methods=['GET'])
-@jwt_required()
-def get_level_progress():
+@token_required
+def get_level_progress(current_user):
     """Get detailed level progress information"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         user_level = UserLevel.query.filter_by(user_id=current_user_id).first()
         
         if not user_level:
@@ -195,11 +196,11 @@ def get_level_progress():
         return jsonify({'error': 'Failed to get level progress'}), 500
 
 @gamification_bp.route('/gamification/recent-achievements', methods=['GET'])
-@jwt_required()
-def get_recent_achievements():
+@token_required
+def get_recent_achievements(current_user):
     """Get user's recent achievements"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         limit = request.args.get('limit', 10, type=int)
         
         recent_achievements = db.session.query(UserAchievement, Achievement).join(
@@ -225,11 +226,11 @@ def get_recent_achievements():
         return jsonify({'error': 'Failed to get recent achievements'}), 500
 
 @gamification_bp.route('/gamification/stats', methods=['GET'])
-@jwt_required()
-def get_gamification_stats():
+@token_required
+def get_gamification_stats(current_user):
     """Get overall gamification statistics"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         
         # Get user level
         user_level = UserLevel.query.filter_by(user_id=current_user_id).first()

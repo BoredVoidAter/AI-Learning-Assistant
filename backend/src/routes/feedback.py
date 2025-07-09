@@ -1,19 +1,19 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from src.models.learning import db, User
+from src.models.user import User
+from src.database import db
 from src.models.feedback import Feedback, FeedbackComment, ContentRating
 from src.utils.validation import validate_required_fields
+from src.utils.auth_utils import token_required
 from datetime import datetime
-import json
 
 feedback_bp = Blueprint('feedback', __name__)
 
 @feedback_bp.route('/feedback', methods=['POST'])
-@jwt_required()
-def submit_feedback():
+@token_required
+def submit_feedback(current_user):
     """Submit new feedback"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         data = request.get_json()
         
         # Validate required fields
@@ -56,11 +56,11 @@ def submit_feedback():
         return jsonify({'error': 'Failed to submit feedback'}), 500
 
 @feedback_bp.route('/feedback', methods=['GET'])
-@jwt_required()
-def get_user_feedback():
+@token_required
+def get_user_feedback(current_user):
     """Get user's feedback submissions"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
         status = request.args.get('status')
@@ -101,11 +101,11 @@ def get_user_feedback():
         return jsonify({'error': 'Failed to get feedback'}), 500
 
 @feedback_bp.route('/feedback/<int:feedback_id>', methods=['GET'])
-@jwt_required()
-def get_feedback_detail(feedback_id):
+@token_required
+def get_feedback_detail(current_user, feedback_id):
     """Get detailed feedback with comments"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         
         feedback = Feedback.query.filter_by(
             id=feedback_id, 
@@ -130,11 +130,11 @@ def get_feedback_detail(feedback_id):
         return jsonify({'error': 'Failed to get feedback detail'}), 500
 
 @feedback_bp.route('/feedback/<int:feedback_id>/comments', methods=['POST'])
-@jwt_required()
-def add_feedback_comment(feedback_id):
+@token_required
+def add_feedback_comment(current_user, feedback_id):
     """Add comment to feedback"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         data = request.get_json()
         
         # Validate required fields
@@ -172,11 +172,11 @@ def add_feedback_comment(feedback_id):
         return jsonify({'error': 'Failed to add comment'}), 500
 
 @feedback_bp.route('/content-rating', methods=['POST'])
-@jwt_required()
-def submit_content_rating():
+@token_required
+def submit_content_rating(current_user):
     """Submit or update content rating"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         data = request.get_json()
         
         # Validate required fields
@@ -235,7 +235,7 @@ def submit_content_rating():
         return jsonify({'error': 'Failed to submit rating'}), 500
 
 @feedback_bp.route('/content-rating/<content_type>/<int:content_id>', methods=['GET'])
-@jwt_required()
+@token_required
 def get_content_ratings(content_type, content_id):
     """Get ratings for specific content"""
     try:
@@ -272,11 +272,11 @@ def get_content_ratings(content_type, content_id):
         return jsonify({'error': 'Failed to get ratings'}), 500
 
 @feedback_bp.route('/content-rating/user/<content_type>/<int:content_id>', methods=['GET'])
-@jwt_required()
-def get_user_content_rating(content_type, content_id):
+@token_required
+def get_user_content_rating(current_user, content_type, content_id):
     """Get user's rating for specific content"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         
         # Validate content type
         valid_types = ['learning_path', 'quiz', 'resource']
@@ -299,11 +299,11 @@ def get_user_content_rating(content_type, content_id):
         return jsonify({'error': 'Failed to get user rating'}), 500
 
 @feedback_bp.route('/feedback/stats', methods=['GET'])
-@jwt_required()
-def get_feedback_stats():
+@token_required
+def get_feedback_stats(current_user):
     """Get feedback statistics for the user"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = current_user.id
         
         # Get feedback counts by type
         feedback_by_type = db.session.query(
